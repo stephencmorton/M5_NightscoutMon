@@ -40,6 +40,7 @@
 #else
   #include <M5Stack.h>
 #endif
+#include <soc/rtc_io_reg.h>
 #include <Preferences.h>
 #include <WiFi.h>
 #include <WiFiMulti.h>
@@ -409,7 +410,9 @@ void play_music_data(uint32_t data_length, uint8_t volume) {
       // delay(10);
       ledcAttachPin(SPEAKER_PIN, TONE_PIN_CHANNEL);
       ledcWriteTone(TONE_PIN_CHANNEL, 0);
+      //gubed
       CLEAR_PERI_REG_MASK(RTC_IO_PAD_DAC1_REG, RTC_IO_PDAC1_XPD_DAC | RTC_IO_PDAC1_DAC_XPD_FORCE);
+      //CLEAR_PERI_REG_MASK(RTC_IO_PDAC1_XPD_DAC , 0);
   } else {
     // silence must make a delay for duration
     delay(data_length/5);
@@ -1761,7 +1764,7 @@ void draw_page() {
             default:
               // sprintf(datetimeStr, "%02d:%02d  %d.%d.  ", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_mday, timeinfo.tm_mon+1);
               // timeinfo.tm_mday=25;
-              strftime(dateStr, 15, "%d.%m.  ", &timeinfo);
+              strftime(dateStr, 15, "%d.%m  ", &timeinfo);
           }
           strcpy(datetimeStr, timeStr);
           strcat(datetimeStr, dateStr);
@@ -1868,6 +1871,8 @@ void draw_page() {
         }
       }
 
+      //gubed change
+      // Time difference box
       M5.Lcd.fillRoundRect(200,0,120,90,15,tdColor);
       M5.Lcd.setTextSize(1);
       M5.Lcd.setFreeFont(FSSB24);
@@ -1895,6 +1900,7 @@ void draw_page() {
       sprintf(tmpstr, "Glyk: %4.1f %s", ns.sensSgv, ns.sensDir);
       Serial.println(tmpstr);
       
+      // BG box
       M5.Lcd.fillRect(0, 110, 320, 114, TFT_BLACK);
       M5.Lcd.setTextSize(2);
       M5.Lcd.setTextDatum(TL_DATUM);
@@ -2422,6 +2428,8 @@ void setup() {
       M5.Lcd.printf("SD Card Size: %llu MB\r\n", cardSize);
     }
 
+ 
+
     readConfiguration(iniFilename, &cfg);
     // strcpy(cfg.url, "https://sugarmate.io/api/v1/xxxxxx/latest.json");
     // strcpy(cfg.url, "user.herokuapp.com"); 
@@ -2637,6 +2645,12 @@ void loop() {
     bool timeOK = getLocalTime(&timeinfo);
     if(timeOK){
       sensorDifSec=difftime(mktime(&timeinfo), ns.sensTime);
+      if (timeinfo.tm_hour >= 11 || timeinfo.tm_hour <= 7){
+        lcdSetBrightness(cfg.brightness3);
+      }
+      else {
+        lcdSetBrightness(lcdBrightness);
+      }
     }
     // Serial.printf("sensorDifSec = %d\r\n", sensorDifSec);
     if(millis()-msCount>15000) {

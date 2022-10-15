@@ -56,8 +56,8 @@ void readConfigFromFlash(tConfig *cfg) {
       strcpy(cfg->userName, " ");
     prefs.getString("device_name", cfg->deviceName, 32);
     if(strlen(cfg->deviceName)==0)
-      strcpy(cfg->deviceName, "M5NS");
-    cfg->timeZone = prefs.getInt("time_zone", 3600);
+      strcpy(cfg->deviceName, "Rowan");
+    cfg->timeZone = prefs.getInt("time_zone", -18000);
     cfg->dst = prefs.getInt("dst", 0);
     cfg->show_mgdl = prefs.getInt("show_mgdl", 0);
     cfg->show_current_time = prefs.getInt("show_cur_time", 1);
@@ -68,7 +68,7 @@ void readConfigFromFlash(tConfig *cfg) {
       strcpy(cfg->restart_at_time, "03:30");
     cfg->restart_at_logged_errors = prefs.getInt("restart_log_err", 30);
     cfg->snooze_timeout = prefs.getInt("snooze_timeout", 30);
-    cfg->alarm_repeat = prefs.getInt("alarm_repeat", 5);
+    cfg->alarm_repeat = prefs.getInt("alarm_repeat", cfg->alarm_repeat);
     cfg->yellow_low = prefs.getFloat("yellow_low", 4.5);
     cfg->yellow_high = prefs.getFloat("yellow_high", 9.0);
     cfg->red_low = prefs.getFloat("red_low", 3.9);
@@ -121,6 +121,11 @@ void readConfigFromFlash(tConfig *cfg) {
         cfg->wlanssid[i][0] = 0;
       }
     }
+
+    // strcpy(cfg->wlanssid[0], "SSSID");
+    // strcpy(cfg->wlanpass[0], "password");
+    // wlans_defined_count = 1;
+
     prefs.end();
     if (wlans_defined_count < 1)
       cfg->is_task_bootstrapping = 1;
@@ -237,6 +242,12 @@ void readConfiguration(const char *iniFilename, tConfig *cfg) {
     } */
     readConfigFromFlash(cfg);
     // aaa this needs more work
+       strcpy(cfg->url, "https://wiz-bgm.up.railway.app/");
+    //strcpy(cfg.url, "user.herokuapp.com"); 
+    strcpy(cfg->wlanssid[0], "SSSID");
+    strcpy(cfg->wlanpass[0], "password");
+    cfg->dev_mode = 0;
+    cfg->is_task_bootstrapping = 0;
     return;
   }
   Serial.println("Ini file exists");
